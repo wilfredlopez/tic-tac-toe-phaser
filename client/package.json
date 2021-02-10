@@ -1,0 +1,26 @@
+{
+  "name": "parchis-phaser",
+  "version": "1.0.0",
+  "description": "Parchis game for Phaser 3 in TypeScript",
+  "keywords": [],
+  "devDependencies": {
+    "expose-loader": "1.0.3",
+    "ts-loader": "8.0.12",
+    "typescript": "4.1.3",
+    "webpack": "5.10.3",
+    "webpack-cli": "4.2.0",
+    "webpack-dev-server": "3.11.0"
+  },
+  "dependencies": {
+    "colyseus.js": "^0.14.1",
+    "phaser": "3.24.1"
+  },
+  "scripts": {
+    "dev": "webpack --mode development && webpack serve --mode development"
+  },
+  "author": {
+    "name": "wilfred lopez",
+    "email": "cubamc@gmail.com"
+  },
+  "license": "MIT"
+}

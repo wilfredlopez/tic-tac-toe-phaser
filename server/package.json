@@ -1,0 +1,30 @@
+{
+    "name": "parchis-server",
+    "version": "1.0.0",
+    "description": "Colyseus Game Server for parchis game",
+    "main": "index.js",
+    "scripts": {
+        "start": "ts-node index.ts",
+        "dev": "ts-node-dev index.ts",
+        "heroku-postbuild": "npm run build"
+    },
+    "engines": {
+        "node": ">=8.9.1"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@colyseus/command": "^0.1.6",
+        "@colyseus/monitor": "^0.14.0",
+        "colyseus": "^0.14.0",
+        "cors": "^2.8.5",
+        "express": "^4.14.0",
+        "serve-index": "^1.8.0",
+        "superagent": "^3.8.1"
+    },
+    "devDependencies": {
+        "ts-node": "^8.3.0",
+        "ts-node-dev": "^1.1.1",
+        "typescript": "^3.5.3"
+    }
+}
