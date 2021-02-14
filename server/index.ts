@@ -3,7 +3,7 @@ import cors from 'cors'
 import { createServer } from 'http'
 import { Server } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
-import { TicTacToeRoom } from './rooms/parchisRoom'
+import { TicTacToeRoom } from './rooms/TicTacToeRoom'
 
 
 

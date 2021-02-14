@@ -1,7 +1,7 @@
 
-export type RoomChangeType = RoomChangeGenericType | RoomDiceChangeType
-export type RoomChangeGenericType = { field: string, op: number, previousValue?: {}, value: {} }[]
-export type RoomDiceChangeType = { field: 'diceValue', op: number, previousValue?: {}, value: {} }[]
-// export type MatchPosition = [blue: number, red: number, green: number, yellow: number]
-// export type MatchPositionOfset = [blue: OFFSET, red: OFFSET, green: OFFSET, yellow: OFFSET]
-// export type OFFSET = { x: number, y: number }
+export type RoomChanges = RoomChangeGenericType | BoardChangeType | ActivePlayeChange
+export type RoomChangeType = ReadonlyArray<RoomChanges>
+
+export type RoomChangeGenericType = { field: '*', op: number, previousValue?: string[], value: string[] }
+export type BoardChangeType = { field: 'board', op: number, previousValue?: number[], value: number[] }
+export type ActivePlayeChange = { field: "activePlayer", op: number, previousValue?: number, value: number }
