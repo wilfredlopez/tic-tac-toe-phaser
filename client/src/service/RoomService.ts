@@ -2,7 +2,7 @@ import * as Colyseus from 'colyseus.js'
 import { ITicTacToeStae } from '../../../shared/IParchisGameState'
 import { SERVER_URL } from '../constants'
 import { RoomChangeType } from '../interfaces/tictactoe.interface'
-import { ClientMessage } from '../../../shared/Messages'
+import { ClientMessage, ServerMessage } from '../../../shared/Messages'
 
 
 enum RoomServerEvents {
@@ -13,6 +13,10 @@ export default class RoomService {
     client: Colyseus.Client
     room: Colyseus.Room<ITicTacToeStae>
     serverEvents: Phaser.Events.EventEmitter
+    private _playerIndex = -1
+    get playerIndex() {
+        return this._playerIndex
+    }
     sessionId: string
     constructor() {
         this.client = new Colyseus.Client(SERVER_URL)
@@ -27,6 +31,9 @@ export default class RoomService {
             if (!this.room) {
                 this.room = await this.client.joinOrCreate<ITicTacToeStae>('tictactoe')
                 this.sessionId = this.room.sessionId
+                this.room.onMessage(ServerMessage.PLAYER_INDEX, (index: number) => {
+                    this._playerIndex = index
+                })
                 this.room.state.onChange = this.handleOnChange.bind(this)
                 return this.room
             }
@@ -47,12 +54,29 @@ export default class RoomService {
     }
 
     makeSelection(index: number) {
+        if (!this.room) {
+            return this
+        }
+        if (this.room.state.activePlayer !== this.playerIndex) {
+            console.warn(`Not this player's turn.`)
+            return this
+        }
         this.room.send(ClientMessage.PLAYER_SELECTION, { index })
         return this
     }
 
     onBoardChanged(cb: (item: number, key: number) => void, context?: object) {
         this.room.state.board.onChange = cb.bind(context)
+    }
+
+    onActivePlayerChange(cb: (value: number) => void, context?: object) {
+        this.serverEvents.on(RoomServerEvents.onChange, (changes: RoomChangeType) => {
+            changes.forEach(change => {
+                if (change.field === 'activePlayer') {
+                    cb.call(context, change.value)
+                }
+            })
+        })
     }
     // onStateChange(cb: (state: ITicTacToeStae) => void, context?: object) {
     //     this.room.onStateChange(cb.bind(context))

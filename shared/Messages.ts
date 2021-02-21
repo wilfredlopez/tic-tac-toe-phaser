@@ -5,5 +5,5 @@ export const ClientMessage = {
 }
 
 export const ServerMessage = {
-
+    PLAYER_INDEX: 'PLAYER_INDEX'
 }

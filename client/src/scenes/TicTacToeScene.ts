@@ -5,6 +5,12 @@ import StateMachine from '../state/StateMachine'
 
 import { CellType } from '../../../shared/CellType'
 
+const Colors = {
+    BLUE: 0x0000ff,
+    RED: 0xff0000,
+    WHITE: 0xffffff
+}
+
 class TicTacToeScene extends Phaser.Scene {
     stateMachine: StateMachine
     roomService: RoomService
@@ -62,6 +68,14 @@ class TicTacToeScene extends Phaser.Scene {
         //     })
         // })
 
+        this.roomService.onActivePlayerChange((value) => {
+            this.onPlayerChanged(value)
+        })
+    }
+
+    private onPlayerChanged(playerIndex: number) {
+        console.log("ACTIVE PLAYER", { playerIndex })
+
     }
 
     private createBoard() {
@@ -72,12 +86,14 @@ class TicTacToeScene extends Phaser.Scene {
         let y = cy - SIZE
         this.roomService.onStateChangeOnce((state) => {
             state.board.forEach((cellState, index) => {
-                const Cell = this.add.rectangle(x, y, SIZE, SIZE, 0xffffff)
+                const Cell = this.add.rectangle(x, y, SIZE, SIZE, Colors.WHITE)
                     .setInteractive()
                     .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
                         console.log(`clicked on ${index}`)
                         this.roomService?.makeSelection(index)
                     })
+
+                this.setStarOrCircle(cellState, Cell)
 
                 this.cells.push({
                     display: Cell,
@@ -98,15 +114,32 @@ class TicTacToeScene extends Phaser.Scene {
     }
 
 
+    private setStarOrCircle(cellState: number, Cell: Phaser.GameObjects.Rectangle) {
+        switch (cellState) {
+            case CellType.X:
+                {
+                    this.add.star(Cell.x, Cell.y, 4, 4, 60, Colors.RED)
+                        .setAngle(45)
+                    break
+                }
+            case CellType.O:
+                {
+                    this.add.circle(Cell.x, Cell.y, 50, Colors.BLUE)
+                    break
+                }
+        }
+    }
+
+
     private handleBoardChange(item: number, key: number) {
         const cell = this.cells[key] || null
         if (cell === null) {
             return
         }
         if (cell.value !== item) {
-            this.add.star(cell.display.x, cell.display.y, 4, 4, 60, 0xff0000)
-                .setAngle(45)
+            this.setStarOrCircle(item, cell.display)
             cell.value = item
+
         }
     }
 
