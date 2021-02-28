@@ -1,6 +1,7 @@
 import 'phaser'
 import LoaderScene from './scenes/LoaderScene'
 import TicTacToeScene from './scenes/TicTacToeScene'
+import GameOverScene from './scenes/GameOverScene'
 
 const config = {
   width: 700,
@@ -10,7 +11,7 @@ const config = {
   version: '1.0',
   type: Phaser.AUTO,
   backgroundColor: '#000000',
-  scene: [LoaderScene, TicTacToeScene],
+  scene: [LoaderScene, TicTacToeScene, GameOverScene],
   scale: {
     mode: Phaser.Scale.ScaleModes.FIT
   },

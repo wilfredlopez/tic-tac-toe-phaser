@@ -69,10 +69,20 @@ export default class RoomService {
         this.room.state.board.onChange = cb.bind(context)
     }
 
+
     onActivePlayerChange(cb: (value: number) => void, context?: object) {
         this.serverEvents.on(RoomServerEvents.onChange, (changes: RoomChangeType) => {
             changes.forEach(change => {
                 if (change.field === 'activePlayer') {
+                    cb.call(context, change.value)
+                }
+            })
+        })
+    }
+    onWinningPlayerChanged(cb: (winningPlayerIndex: number) => void, context?: object) {
+        this.serverEvents.on(RoomServerEvents.onChange, (changes: RoomChangeType) => {
+            changes.forEach(change => {
+                if (change.field === 'winningPlayer') {
                     cb.call(context, change.value)
                 }
             })

@@ -34,7 +34,6 @@ class TicTacToeScene extends Phaser.Scene {
         this.initializeStateMachine()
         this.createBoard()
         this.setRoomListeners()
-
     }
 
     private initializeStateMachine() {
@@ -71,11 +70,24 @@ class TicTacToeScene extends Phaser.Scene {
         this.roomService.onActivePlayerChange((value) => {
             this.onPlayerChanged(value)
         })
+
+    }
+
+    private handleWiningPlayer(winningPlayerIndex: number) {
+        if (winningPlayerIndex === -1) {
+            return
+        }
+        if (this.roomService.playerIndex === winningPlayerIndex) {
+            console.log("YOU WIN")
+            this.scene.launch(SCENE_KEYS.GameOver, { result: "YOU WIN" })
+        } else {
+            console.log("YOU LOOSE")
+            this.scene.launch(SCENE_KEYS.GameOver, { result: "YOU LOOSE" })
+        }
     }
 
     private onPlayerChanged(playerIndex: number) {
         console.log("ACTIVE PLAYER", { playerIndex })
-
     }
 
     private createBoard() {
@@ -109,6 +121,10 @@ class TicTacToeScene extends Phaser.Scene {
         })
         this.roomService.onBoardChanged((item, key) => {
             this.handleBoardChange(item, key)
+        })
+
+        this.roomService.onWinningPlayerChanged((value) => {
+            this.handleWiningPlayer(value)
         })
 
     }

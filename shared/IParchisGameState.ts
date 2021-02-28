@@ -73,5 +73,6 @@ export interface ITicTacToeStae {
     board: ArraySchema<number>
     activePlayer: number
     onChange?: any
+    winningPlayer: number
 }
 
