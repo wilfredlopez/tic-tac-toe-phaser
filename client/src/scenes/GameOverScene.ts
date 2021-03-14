@@ -1,4 +1,5 @@
 import { SCENE_KEYS } from '../constants'
+import { IGameOverSceneData } from '../interfaces/tictactoe.interface'
 
 class GameOverScene extends Phaser.Scene {
 
@@ -13,16 +14,23 @@ class GameOverScene extends Phaser.Scene {
     // }
 
 
-    public async create({ result }: { result: string }) {
-        const { cx } = this.getCenter()
-        this.add.text(cx, 250, result, {
-            fontSize: 30,
+    public async create(data: IGameOverSceneData) {
+        const { cx, cy } = this.getCenter()
+        const result = data.winner ? "YOU WIN!" : "YOU LOST!"
+        const title = this.add.text(cx, cy, result, {
+            fontSize: 40,
             color: '#ffffff',
             align: 'center',
             strokeThickness: 1
-
         })
             .setOrigin(0.5)
+
+        this.add.text(title.x, title.y + 100, 'Press Space to play again.').setOrigin(0.5)
+
+        this.input.keyboard.once('keyup-SPACE', () => {
+            data?.onRestart()
+        })
+
 
     }
 

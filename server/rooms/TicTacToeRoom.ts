@@ -1,5 +1,5 @@
 import { Client, Room } from 'colyseus'
-import { ClientMessage, ServerMessage, CellType } from '../../shared'
+import { ClientMessage, ServerMessage, CellType, GameState } from '../../shared'
 import { TicTacToeState } from '../schema/TicTacToeState'
 
 
@@ -78,11 +78,11 @@ export class TicTacToeRoom extends Room<TicTacToeState> {
     private handlePlayerSelection() {
         const win = this.determineWin()
         if (win) {
-            console.log("WIN")
+            // console.log("WIN")
             // set active player the winning player on state
             this.state.winningPlayer = this.state.activePlayer
         } else {
-            console.log('setting player')
+            // console.log('setting player')
             this.setNextPlayer()
         }
     }
@@ -91,6 +91,10 @@ export class TicTacToeRoom extends Room<TicTacToeState> {
         this.onMessage(ClientMessage.PLAYER_SELECTION, (client, message: { index: number }) => {
             const clientIndex = this.clients.findIndex(c => c.id === client.id)
 
+            if (this.state.gameState !== GameState.Playing) {
+                console.warn("Trying to select but GameState is not Playing.")
+                return
+            }
             if (clientIndex !== this.state.activePlayer) {
                 return
             }
@@ -119,11 +123,19 @@ export class TicTacToeRoom extends Room<TicTacToeState> {
         //do work
         const playerIndex = this.clients.findIndex(c => c.sessionId === client.sessionId)
         client.send(ServerMessage.PLAYER_INDEX, playerIndex)
+        if (this.clients.length >= 2) {
+            this.state.gameState = GameState.Playing
+            this.lock()
+        }
     }
     onLeave(client: Client, _consented: boolean) {
         //todo
 
-
+        if (this.clients.length >= 2) {
+            this.state.gameState = GameState.Playing
+        } else {
+            this.state.gameState = GameState.waitingForPlayers
+        }
     }
 
     onDispose() { }

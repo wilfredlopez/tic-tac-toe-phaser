@@ -38,7 +38,7 @@ export const STATES = {
 
 
 export const SCENE_KEYS = {
-    ParchisScene: "ParchisScene",
+    TicTacToeScene: "TicTacToeScene",
     LoaderScene: "LoaderScene",
     GameOver: "GameOver"
 }

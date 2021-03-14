@@ -1,5 +1,5 @@
 import { ArraySchema, Schema, type } from '@colyseus/schema'
-import { ITicTacToeStae } from '../../shared/IParchisGameState'
+import { GameState, ITicTacToeStae } from '../../shared'
 
 
 export class TicTacToeState extends Schema implements ITicTacToeStae {
@@ -7,7 +7,8 @@ export class TicTacToeState extends Schema implements ITicTacToeStae {
     @type(['number'])
     board: ArraySchema<number>
 
-
+    @type('number')
+    gameState: GameState = GameState.waitingForPlayers
     @type('number')
     activePlayer: number
 

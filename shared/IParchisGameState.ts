@@ -1,3 +1,4 @@
+import { GameState } from './GameState.interface'
 export declare const SWITCH_TO_STRUCTURE = 255
 export declare const TYPE_ID = 213
 /**
@@ -69,10 +70,14 @@ export interface ArraySchema<V> extends Array<V>, SchemaDecoderCallbacks {
     onRemove?: (item: V, key: number) => void
     onChange?: (item: V, key: number) => void
 }
+
+
+// export type GameStateType = 0 | 1 | 2
 export interface ITicTacToeStae {
     board: ArraySchema<number>
     activePlayer: number
     onChange?: any
     winningPlayer: number
+    gameState: GameState
 }
 

@@ -55,7 +55,7 @@ export default class StateMachine {
             return
         }
         this.isSwichingState = true
-        console.log(`ParchisStateMachine (${this.id}) change from ${this.currentState?.name} to ${name}`)
+        console.warn(`ParchisStateMachine (${this.id}) change from ${this.currentState?.name} to ${name}`)
         if (this.currentState && this.currentState.onExit) {
             this.currentState.onExit()
         }

@@ -4,6 +4,8 @@ import RoomService from '../service/RoomService'
 import StateMachine from '../state/StateMachine'
 
 import { CellType } from '../../../shared/CellType'
+import { TicTacToeSceneData, IGameOverSceneData } from '../interfaces/tictactoe.interface'
+import { GameState } from '../../../shared/GameState.interface'
 
 const Colors = {
     BLUE: 0x0000ff,
@@ -15,21 +17,27 @@ class TicTacToeScene extends Phaser.Scene {
     stateMachine: StateMachine
     roomService: RoomService
     room: RoomService['room']
+    turnText?: Phaser.GameObjects.Text
+
+    onGameOver?: (data: IGameOverSceneData) => void
     private cells: { display: Phaser.GameObjects.Rectangle, value: number }[] = []
+    private gameText?: Phaser.GameObjects.Text
     /* ------------------------------------ */
     constructor() {
-        super({ key: SCENE_KEYS.ParchisScene })
-        this.stateMachine = new StateMachine(this, 'game')
+        super({ key: SCENE_KEYS.TicTacToeScene })
     }
 
 
-    // public async init() {
+    public async init() {
+        this.stateMachine = new StateMachine(this, 'game')
+        this.cells = []
+    }
 
-    // }
 
-
-    public async create() {
-        this.roomService = new RoomService()
+    public async create(data: TicTacToeSceneData) {
+        // this.roomService = new RoomService()
+        this.roomService = data.roomService
+        this.onGameOver = data.onGameOver
         this.room = await this.roomService.createRoom()
         this.initializeStateMachine()
         this.createBoard()
@@ -77,13 +85,23 @@ class TicTacToeScene extends Phaser.Scene {
         if (winningPlayerIndex === -1) {
             return
         }
-        if (this.roomService.playerIndex === winningPlayerIndex) {
-            console.log("YOU WIN")
-            this.scene.launch(SCENE_KEYS.GameOver, { result: "YOU WIN" })
-        } else {
-            console.log("YOU LOOSE")
-            this.scene.launch(SCENE_KEYS.GameOver, { result: "YOU LOOSE" })
-        }
+
+        this.time.delayedCall(100, () => {
+            if (winningPlayerIndex === -1) {
+                return
+            }
+            this.onGameOver({
+                winner: this.roomService.playerIndex === winningPlayerIndex,
+            })
+        })
+
+        // if (this.roomService.playerIndex === winningPlayerIndex) {
+        //     console.log("YOU WIN")
+        //     this.scene.launch(SCENE_KEYS.GameOver, { result: "YOU WIN!", winner: true, })
+        // } else {
+        //     console.log("YOU LOOSE")
+        //     this.scene.launch(SCENE_KEYS.GameOver, { result: "YOU LOST!", winner: false, })
+        // }
     }
 
     private onPlayerChanged(playerIndex: number) {
@@ -101,7 +119,7 @@ class TicTacToeScene extends Phaser.Scene {
                 const Cell = this.add.rectangle(x, y, SIZE, SIZE, Colors.WHITE)
                     .setInteractive()
                     .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
-                        console.log(`clicked on ${index}`)
+                        // console.log(`clicked on ${index}`)
                         this.roomService?.makeSelection(index)
                     })
 
@@ -117,8 +135,12 @@ class TicTacToeScene extends Phaser.Scene {
                     y += SIZE + GAP
                 }
             })
-
+            if (this.roomService.gameState === GameState.waitingForPlayers) {
+                this.gameText = this.add.text(cx, 50, 'Waiting for opponent...').setOrigin(0.5)
+            }
         })
+
+
         this.roomService.onBoardChanged((item, key) => {
             this.handleBoardChange(item, key)
         })
@@ -126,9 +148,21 @@ class TicTacToeScene extends Phaser.Scene {
         this.roomService.onWinningPlayerChanged((value) => {
             this.handleWiningPlayer(value)
         })
-
+        this.roomService.onGameStateChange((value) => {
+            this.handleGameStateChange(value)
+        })
     }
 
+    private handleGameStateChange(value: number) {
+        // const { cx } = this.getCenter()
+        // if (value === GameState.waitingForPlayers) {
+        //     this.gameText = this.add.text(cx, 50, 'Waiting for opponent...').setOrigin(0.5)
+        // }
+        if (value === GameState.Playing && this.gameText) {
+            this.gameText?.destroy()
+            this.gameText = undefined
+        }
+    }
 
     private setStarOrCircle(cellState: number, Cell: Phaser.GameObjects.Rectangle) {
         switch (cellState) {
@@ -146,15 +180,18 @@ class TicTacToeScene extends Phaser.Scene {
         }
     }
 
+    get playerCellType() {
+        return this.roomService.playerIndex === 0 ? CellType.X : CellType.O
+    }
 
-    private handleBoardChange(item: number, key: number) {
-        const cell = this.cells[key] || null
+    private handleBoardChange(newvalue: number, idx: number) {
+        const cell = this.cells[idx] || null
         if (cell === null) {
             return
         }
-        if (cell.value !== item) {
-            this.setStarOrCircle(item, cell.display)
-            cell.value = item
+        if (cell.value !== newvalue) {
+            this.setStarOrCircle(newvalue, cell.display)
+            cell.value = newvalue
 
         }
     }
@@ -174,12 +211,34 @@ class TicTacToeScene extends Phaser.Scene {
 
 
 
+    private handleTurnText() {
+        const cell = this.playerCellType === CellType.X ? "X" : "O"
+        const prefix = `${cell}:`
+        let text = `${prefix} WAITING`
+        if (this.room && this.roomService) {
+            if (this.room.state.activePlayer === this.roomService.playerIndex) {
+                text = `${prefix} YOUR TURN`
+            }
+            if (this.roomService.gameState !== GameState.Playing) {
+                text = ''
+            }
+
+        }
+        if (!this.turnText) {
+            this.turnText = this.add.text(this.scale.width * 0.5, 100, text).setOrigin(0.5)
+        } else {
+            // this.turnText.setText(text)
+            this.turnText.destroy()
+            this.turnText = this.add.text(this.scale.width * 0.5, 100, text).setOrigin(0.5)
+        }
+    }
 
 
     update(_time?: number, delta?: number) {
         if (this.stateMachine) {
             this.stateMachine.update(delta)
         }
+        this.handleTurnText()
     }
 }
 

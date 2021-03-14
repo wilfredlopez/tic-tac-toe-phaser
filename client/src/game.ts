@@ -7,7 +7,7 @@ const config = {
   width: 700,
   height: 1024,
   parent: "container",
-  title: 'Parchis',
+  title: 'Tic Tac Toe',
   version: '1.0',
   type: Phaser.AUTO,
   backgroundColor: '#000000',
